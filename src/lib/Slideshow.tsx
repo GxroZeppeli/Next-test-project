@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -8,7 +8,6 @@ export default function Slideshow({
 }: {
   slides: { id: number; image: string; name: string; path: string; description: string }[];
 }) {
-  const [currentSlide, setCurrentSlide] = useState(0);
   const sliderInterval = useRef<NodeJS.Timeout | undefined>(undefined);
 
   const debounce = (func: any, timeout: number) => {
@@ -23,19 +22,29 @@ export default function Slideshow({
 
   const switchSlide = (direction: number) => { // 0 - forward, 1 - backward
     const image = document.querySelector('.image');
-    image?.classList.toggle('opacity-100');
-    image?.classList.toggle('opacity-0');
-    setTimeout(() => {
-        setCurrentSlide(currentSlide => {
-          if(direction === 0) {
-            return (currentSlide + 1) % slides.length;
-          } else {
-            return (currentSlide - 1 + slides.length) % slides.length;
-          }
-        });
-        image?.classList.toggle('opacity-0');
-        image?.classList.toggle('opacity-100');
-    }, 150);
+    if(!image) return;
+    const width = image.clientWidth;
+    if (direction === 0 && image.scrollLeft + width >= image.scrollWidth) {
+      image.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: 'smooth'
+      });
+      return;
+    }
+    if (direction === 1 && image.scrollLeft - width < 0) {
+      image.scrollTo({
+        top: 0,
+        left: image.scrollWidth,
+        behavior: 'smooth'
+      });
+      return;
+    }
+    image.scrollBy({
+      top: 0,
+      left: direction === 0 ? width : -width,
+      behavior: 'smooth'
+    });
   };
 
   const handleNextSlide = () => {
@@ -50,13 +59,18 @@ export default function Slideshow({
     switchSlide(1);
   };
 
+  const onScroll = () => {
+    clearInterval(sliderInterval.current);
+    sliderInterval.current = setInterval(() => switchSlide(0), 5000);
+  };
+
   useEffect(() => {
     sliderInterval.current = setInterval(() => switchSlide(0), 5000);
     return () => clearInterval(sliderInterval.current);
   }, []);
 
   return (
-    <div className="h-[30rem] md:h-[40rem] lg:h-[50rem] w-full bg-neutral-400 relative mb-8">
+    <div className="h-[30rem] md:h-[24rem] lg:h-[30rem] xl:h-[36em] 2xl:h-[50rem] w-full relative overflow-hidden">
       <button onClick={debounce(handlePrevSlide, 250)} className='absolute top-1/2 left-5 -translate-y-1/2 z-10'>
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -70,16 +84,27 @@ export default function Slideshow({
         </svg>
       </button>
 
-      <div className="image absolute top-0 left-0 right-0 bottom-0 transition-opacity opacity-100">
-        <Link href={slides[currentSlide].path}>
-          <Image 
-              src={slides[currentSlide].image} 
-              alt={slides[currentSlide].name} 
-              className='w-full h-full object-cover'
-              width={1800}
-              height={800}
-          />
-        </Link>
+      <div className="image w-full h-full flex overflow-x-auto overflow-y-hidden snap-mandatory snap-x" onScroll={onScroll}>
+        {slides.map((slide: any) => (
+            <div key={slide.id} className="w-screen h-full snap-center flex-shrink-0 relative">
+              <Link   href={slide.path}>
+                <Image
+                  src={slide.image}
+                  alt={slide.name}
+                  width={1920}
+                  height={1080}
+                  className="w-full h-full object-cover"
+                />
+              </Link>
+              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-white opacity-95 px-10 py-6 rounded-2xl bg-neutral-800 flex flex-col gap-2 items-center w-5/6 lg:w-1/2">
+                <span className='text-xl font-bold'>{slide.name}</span>
+                <p>{slide.description}</p>
+                <Link href={slide.path} className='bg-indigo-600 hover:bg-indigo-400 text-neutral-100 font-bold transition rounded-lg px-4 py-2'>
+                  Learn more
+                </Link>
+              </div>
+            </div>
+          ))}
       </div>
 
       <button onClick={debounce(handleNextSlide, 250)} className='absolute top-1/2 right-5 -translate-y-1/2 z-10'>
@@ -94,14 +119,6 @@ export default function Slideshow({
           <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
         </svg>
       </button>
-
-      <div className="absolute bottom-[-2rem] left-1/2 -translate-x-1/2 text-white opacity-95 px-10 py-6 rounded-2xl bg-neutral-800 flex flex-col gap-2 items-center w-5/6 lg:w-1/2">
-        <span className='text-xl font-bold'>{slides[currentSlide].name}</span>
-        <p>{slides[currentSlide].description}</p>
-        <Link href={slides[currentSlide].path} className='bg-indigo-600 hover:bg-indigo-400 text-neutral-100 font-bold transition rounded-lg px-4 py-2'>
-          Learn more
-        </Link>
-      </div>
     </div>
   );
 }

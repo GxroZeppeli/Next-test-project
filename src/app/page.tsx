@@ -15,7 +15,7 @@ export default async function Home() {
   return (
     <main>
       <Slideshow slides={slides} />
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 px-8 pt-16">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 px-8 pt-6 md:pt-8">
         <CategoryCard category={'Keyboards'} link={'/keyboards'} image={'/holy1.png'} />
         <CategoryCard category={'Keycaps'} link={'/keycaps'} image={'/keycaps.png'} />
         <CategoryCard category={'Mice'} link={'/mice'} image={'/mice.png'} />
