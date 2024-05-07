@@ -39,7 +39,7 @@ const FormSchema = z.object({
     let quantErrors: {[key: string]: string[]} = {};
     const options: number[] = [];
 
-    [...data.entries()].forEach(([key, value]: [string, string]) => {
+    [...data.entries()].forEach(([key, value]: [string, any]) => {
         if (key !== 'id' && key !== 'quantity' && !key.includes('ACTION')) {
             const partObj = JSON.parse(value);
             options.push(partObj.id);
@@ -51,7 +51,7 @@ const FormSchema = z.object({
     if (Object.keys(quantErrors).length > 0) {
         return {
             errors: {
-                ...parsedData?.error?.formErrors?.fieldErrors,
+                ...(parsedData as any)?.error?.formErrors?.fieldErrors,
                 ...quantErrors
             }
         };
@@ -65,7 +65,7 @@ const FormSchema = z.object({
         };
     }
     
-    await addProductToCart(session.user.email, parsedData.data.id, parsedData.data.quantity, options);
+    await addProductToCart(session?.user?.email as string, parsedData.data.id, parsedData.data.quantity, options);
 
     return {
         message: 'Added to cart'
@@ -94,7 +94,7 @@ export async function authenticate(
       }
       await signIn('credentials', formData);
       redirect('/keyboards');
-    } catch (error) {
+    } catch (error: any) {
       
       if (error?.type) {
         switch (error.type) {
@@ -154,7 +154,7 @@ export async function register(
         }
       }
 
-    } catch (error) {
+    } catch (error: any) {
       if (error?.type) {
         switch (error.type) {
           case 'CredentialsSignin':
