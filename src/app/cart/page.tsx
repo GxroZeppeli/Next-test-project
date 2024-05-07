@@ -5,7 +5,7 @@ import Refresh from "@/lib/Refresh";
 
 export default async function Cart() {
     const session = await auth();
-    const cart = await getCartContent(session?.user?.email);
+    const cart = await getCartContent(session?.user?.email as string);
 
     return (
         <div className="flex items-center py-8 flex-col gap-4">

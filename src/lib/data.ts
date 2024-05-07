@@ -539,7 +539,7 @@ export async function fetchProductPage(path: string): Promise<Product> {
       break;
     }
 
-    const product = data.rows[0];
+    const product = data?.rows[0];
     product.discountedPrice = formatCurrency(+product.price - ((+product.discount / 100) * +product.price));
     product.price = formatCurrency(+product.price);
 
@@ -821,9 +821,8 @@ export async function getOrders(email: string) {
       JOIN products p ON p.id = oe.product_id
       WHERE o.email = ${email}`
     );
-    const orders = {};
+    const orders: any = {};
     data.rows.forEach((row: any) => {
-      
       if (!orders[row.id]) orders[row.id] = {
         id: row.id,
         date: row.order_date.toLocaleDateString().replace(/\//g, '-'),

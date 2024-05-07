@@ -11,8 +11,7 @@ export default function ProductOptions({product, parts, types}:
         parts: Part[], 
         types: Set<string> 
     }) {
-    const initialState = { message: null, errors: {} };
-    const [ state, dispatch ] = useFormState(addToCart, initialState); 
+    const [ state, dispatch ] = useFormState(addToCart, null); 
 
     return (
         <form className="w-full" action={dispatch}>
@@ -39,7 +38,7 @@ export default function ProductOptions({product, parts, types}:
                                         </option>
                                     ))}
                                 </select>
-                                {state.errors && state.errors[type] && 
+                                {state?.errors && state.errors[type] && 
                                 state.errors[type].map((error: string) => (
                                     <p className="text-yellow-400 mt-2" key={error}>
                                         {error}
@@ -59,7 +58,7 @@ export default function ProductOptions({product, parts, types}:
                         defaultValue={1}
                         className="w-full text-xl p-4 bg-transparent border border-indigo-600 text-center rounded-lg"
                     />
-                    {state.errors?.quantity && 
+                    {state?.errors?.quantity && 
                         state.errors.quantity.map((error: string) => (
                             <p className="text-yellow-400" key={error}>
                                 {error}
@@ -71,7 +70,7 @@ export default function ProductOptions({product, parts, types}:
                 type="submit"
                 className="w-full bg-indigo-600 hover:bg-indigo-400 text-lg font-bold transition rounded-lg py-4"
             >
-                {state.message ? state.message : 'Add to cart'}
+                {state?.message ? state.message : 'Add to cart'}
             </button>
         </form>
     );

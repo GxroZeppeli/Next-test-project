@@ -137,22 +137,22 @@ export default function Entry({id, path, discount, image, name, price, options, 
     );
 }
 
-export function CartContent({ cart, session }) {
+export function CartContent({ cart, session }: any) {
     const [loading, setLoading] = useState(false);
     const [products, setProducts] = useState(cart);
     const [modalState, setModalState] = useState(0); // 1: success, 2: out of stock, 3: error
     
     let totalPrice = 0;
-    [...Object.values(cart)].forEach(product => {
+    [...Object.values(cart)].forEach((product: any) => {
         totalPrice += (product.price - ((product.price * product.discount) / 100)) * product.amount;
     });
 
     const [price, setPrice] = useState(totalPrice);
 
-    const modal = useRef(null);
+    const modal = useRef<HTMLDialogElement | null>(null);
     const closeModal = () => {
         setModalState(0);
-        modal?.current?.close();
+        if (modal.current) modal.current.close();
     };
 
     const placeOrder = async () => {
@@ -171,14 +171,14 @@ export function CartContent({ cart, session }) {
             if (!res.ok) {
                 setLoading(false);
                 setModalState(3);
-                modal.current.showModal();
+                if (modal.current) modal.current.showModal();
                 return; 
             }
             const data = await res.text();
             if (data == 'Not enough stock.') {
                 setLoading(false);
                 setModalState(2);
-                modal.current.showModal();
+                if (modal.current) modal.current.showModal();
                 return; 
             }
             else {
@@ -186,7 +186,7 @@ export function CartContent({ cart, session }) {
                 setPrice(0);
                 setLoading(false);
                 setModalState(1);
-                modal.current.showModal();
+                if (modal.current) modal.current.showModal();
                 return;
             }
         }
@@ -195,7 +195,7 @@ export function CartContent({ cart, session }) {
     return (
         <div className="w-full flex flex-col md:flex-row items-center md:items-start justify-center relative mt-4">
             <div className="w-full md:w-1/2 flex flex-col gap-4">
-                {[...Object.values(products)].map((product) => (
+                {[...Object.values(products)].map((product: any) => (
                     <Entry key={product.id} {...product} setLoading={setLoading} setPrice={setPrice} />
                 ))}
             </div>

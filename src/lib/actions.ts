@@ -19,16 +19,7 @@ const FormSchema = z.object({
     .refine(data => data !== '', { message: 'Please select an option.' }),
 });
 
-export type State = {
-    errors?: {
-        case?: string;
-        pcb?: string;
-        plate?: string;
-    };
-    message?: string | null;
-};
-
- export async function addToCart(prevState: State, data: FormData) {
+ export async function addToCart(prevState: any, data: FormData) {
     const parsedData = FormSchema.safeParse({
         ...Object.fromEntries(data.entries()),
         id: Number(data.get('id')),
@@ -82,7 +73,7 @@ export type State = {
 }
 
 export async function authenticate(
-    prevState: string | undefined,
+    prevState: any,
     formData: FormData,
   ) {
     try {
@@ -121,7 +112,7 @@ export async function authenticate(
 }
 
 export async function register(
-    prevState: string | undefined,
+    prevState: any,
     formData: FormData,
   ) {
     

@@ -6,13 +6,13 @@ import Refresh from "@/lib/Refresh";
 
 export default async function Orders() {
     const session = await auth();
-    const orders = await getOrders(session?.user?.email);
+    const orders = await getOrders(session?.user?.email as string);
 
     return (
         <div className="flex flex-col items-center">
             <h1 className="text-3xl font-bold py-4 mt-4">Orders</h1>
             <div className="w-full px-2 md:px-8 flex flex-col gap-4">
-                {orders.map((order) => (
+                {orders.map((order: any) => (
                     <div key={order.id} className="w-full py-4 px-6 border-b border-neutral-700 bg-neutral-800 rounded-lg">
                         <div className="flex gap-4 justify-between">
                             <span>id: {order.id}</span>
@@ -23,7 +23,7 @@ export default async function Orders() {
                             <span>{order.price}</span>
                         </div>
                         <div className="flex gap-4 overflow-x-auto mt-4">
-                            {order.products.map((product) => (
+                            {order.products.map((product: any) => (
                                 <div key={product.name} className="flex">
                                     <Link href={`/products/${product.path}`}>
                                         <div className="flex gap-2 flex-col items-center">

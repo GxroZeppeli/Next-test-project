@@ -6,7 +6,6 @@ import { fetchLatestProducts, fetchSlides } from "@/lib/data";
 
 
 export default async function Home() {
-  // fetch slides on server
   const slides = await fetchSlides();
   const products = await fetchLatestProducts('');
   const keyboards = await fetchLatestProducts('keyboard');

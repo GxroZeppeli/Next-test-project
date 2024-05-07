@@ -5,7 +5,7 @@ import ProductOptions from "@/lib/ProductOptions";
 import TableEntry from "@/lib/TableEntry";
 
 export default async function Page({ params }: { params: { path: string } }) {
-    let product;
+    let product: any;
     try {
         product = await fetchProductPage(params.path);
         

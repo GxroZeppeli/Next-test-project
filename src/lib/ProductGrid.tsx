@@ -8,8 +8,8 @@ export default async function ProductGrid({
             id: number,
             name: string,
             image: string,
-            price: number,
-            discount: number
+            price: string,
+            discount: string
         }[]
 }) {
     return (

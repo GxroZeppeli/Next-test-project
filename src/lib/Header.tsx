@@ -22,13 +22,13 @@ export default function Header({ session }: { session: any }) {
     }
     
     const moreRef = useRef(null);
-    const showMore = () => showDropdown(moreRef.current);
-    const hideMore = () => hideDropdown(moreRef.current);
+    const showMore = () => showDropdown(moreRef.current as unknown as HTMLElement);
+    const hideMore = () => hideDropdown(moreRef.current as unknown as HTMLElement);
     const userRef = useRef(null);
-    const showUser = () => showDropdown(userRef.current);
-    const hideUser = () => hideDropdown(userRef.current);
+    const showUser = () => showDropdown(userRef.current as unknown as HTMLElement);
+    const hideUser = () => hideDropdown(userRef.current as unknown as HTMLElement);
     const burgerRef = useRef(null);
-    const toggleBurger = () => toggleMenu(burgerRef.current.parentElement);
+    const toggleBurger = () => toggleMenu((burgerRef.current as unknown as HTMLElement).parentElement as HTMLElement);
 
     return (
         <header className="sticky left-0 top-0 right-0 w-full bg-stone-950 text-zinc-200 z-50">

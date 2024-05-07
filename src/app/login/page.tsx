@@ -11,7 +11,7 @@ import { authenticate } from '@/lib/actions';
 import Link from 'next/link';
 
 export default function LoginForm() {
-  const [errorMessage, dispatch] = useFormState(authenticate, undefined);
+  const [errorMessage, dispatch] = useFormState(authenticate, null);
 
   return (
     <form className="w-full h-[80vh] flex items-center justify-center flex-col" action={dispatch}>
