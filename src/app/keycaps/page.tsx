@@ -18,8 +18,8 @@ export default async function Page({
         };
 }) {
     const profiles = await fetchProfiles();
-    const brands = await fetchBrands('keyboard');
-    const priceLimit = await fetchMaxPrice('keyboard');
+    const brands = await fetchBrands('keycap');
+    const priceLimit = await fetchMaxPrice('keycap');
     const currentPage = Number(searchParams?.page) || 1;
     const query = {
         stock: searchParams?.stock === 'In Stock' ? '1' : searchParams?.stock === 'Out of Stock' ? '0' : '1',

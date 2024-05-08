@@ -16,7 +16,7 @@ export default async function Orders() {
                     <div key={order.id} className="w-full py-4 px-6 border-b border-neutral-700 bg-neutral-800 rounded-lg">
                         <div className="flex gap-4 justify-between">
                             <span>id: {order.id}</span>
-                            <span>Status: {order.status}</span>
+                            <span className="text-end">Status: {order.status}</span>
                         </div>
                         <div className="flex gap-4 justify-between">
                             <span>{order.date}</span>

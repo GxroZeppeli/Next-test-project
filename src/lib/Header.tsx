@@ -41,16 +41,16 @@ export default function Header({ session }: { session: any }) {
                         <Link href="/keyboards">Keyboards</Link>
                     </li>
                     <li className="py-4">
-                        <Link href="/mousepads">Mousepads</Link>
-                    </li>
-                    <li className="py-4">
-                        <Link href="/mice">Mice</Link>
+                        <Link href="/keycaps">Keycaps</Link>
                     </li>
                     <li className="py-4">
                         <Link href="/switches">Switches</Link>
                     </li>
                     <li className="py-4">
-                        <Link href="/Keycaps">Keycaps</Link>
+                        <Link href="/mousepads">Mousepads</Link>
+                    </li>
+                    <li className="py-4">
+                        <Link href="/mice">Mice</Link>
                     </li>
                     <li className="relative py-4 pr-5" ref={moreRef} onMouseEnter={showMore} onMouseLeave={hideMore}>
                         <span>More</span>
@@ -115,16 +115,16 @@ export default function Header({ session }: { session: any }) {
                             <Link href="/keyboards">Keyboards</Link>
                         </li>
                         <li>
-                            <Link href="/mousepads">Mousepads</Link>
-                        </li>
-                        <li>
-                            <Link href="/mice">Mice</Link>
+                            <Link href="/Keycaps">Keycaps</Link>
                         </li>
                         <li>
                             <Link href="/switches">Switches</Link>
                         </li>
                         <li>
-                            <Link href="/Keycaps">Keycaps</Link>
+                            <Link href="/mousepads">Mousepads</Link>
+                        </li>
+                        <li>
+                            <Link href="/mice">Mice</Link>
                         </li>
                         <li>
                             <Link href="/plates">Plates</Link>
