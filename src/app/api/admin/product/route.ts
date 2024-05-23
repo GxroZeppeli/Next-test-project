@@ -1,6 +1,7 @@
 import { createProduct, getRole, updateProduct } from "@/lib/data";
 import fs from 'node:fs';
 import { auth } from "@/../../auth";
+import path from "node:path";
 
 export async function PUT(req: Request) {
     const session = await auth();
@@ -17,7 +18,7 @@ export async function PUT(req: Request) {
             const imageData = Buffer.from(matches[2], 'base64');
             
             const imageName = `/${Date.now()}.${type.split('/')[1]}`;
-            const filePath = `public${imageName}`;
+            const filePath = path.join(process.cwd(), `public${imageName}`);
             fs.writeFile(filePath, imageData, 'binary', (err) => {
                 if (err) {
                     console.error(err);
@@ -25,7 +26,7 @@ export async function PUT(req: Request) {
                 }
                 console.log('Image saved to ' + filePath);
             });
-            fs.unlinkSync(`public${data.oldImage}`);
+            fs.unlinkSync(path.join(process.cwd(), `public${data.oldImage}`));
 
             await updateProduct(data.id, data.name, data.type, data.price, data.discount, data.path, imageName, data.brand, data.stock);
         } 
@@ -52,7 +53,7 @@ export async function POST(req: Request) {
         const imageData = Buffer.from(matches[2], 'base64');
         
         const imageName = `/${Date.now()}.${type.split('/')[1]}`;
-        const filePath = `public${imageName}`;
+        const filePath = path.join(process.cwd(), `public${imageName}`);
         fs.writeFile(filePath, imageData, 'binary', (err) => {
             if (err) {
                 console.error(err);
