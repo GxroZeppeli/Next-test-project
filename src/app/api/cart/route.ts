@@ -1,6 +1,9 @@
 import { alterProductAmount, deleteFromCart } from "@/lib/data";
+import { auth } from "@/../auth";
 
 export async function POST(req: Request) {
+    const session = await auth();
+    if (!session) return new Response('Unauthorized.', { status: 401 });
     const data = await req.json();
     const amount = data.amount;
     const id = data.id;
@@ -18,6 +21,8 @@ export async function POST(req: Request) {
 }
 
 export async function DELETE(req: Request) {
+    const session = await auth();
+    if (!session) return new Response('Unauthorized.', { status: 401 });
     const data = await req.json();
     const id = data.id;
     

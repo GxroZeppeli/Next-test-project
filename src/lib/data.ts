@@ -1,6 +1,7 @@
 import { Pool } from 'pg';
 import sql from 'sql-template-strings';
 import { formatCurrency } from './utils';
+import email from 'next-auth/providers/email';
 
 type RawProduct = {
     id: number;
@@ -246,23 +247,36 @@ export async function fetchProductAmount({
   stock,
   brand, 
   priceGreater,
-  priceLess
+  priceLess,
+  ITEMS_PER_PAGE = 24
 }: {
   stock: string,
   brand: string, 
   priceGreater: number,
-  priceLess: number
+  priceLess: number,
+  ITEMS_PER_PAGE?: number
 }) {
   try {
     const client = await pool.connect();
-    const data = await client.query(sql`
-      SELECT COUNT(*) AS amount
-      FROM products
-      WHERE stock = ${stock}
-      AND brand ~ ${brand}
-      AND price * (1 - discount/100.0) >= ${priceGreater * 100}
-      AND price * (1 - discount/100.0) <= ${priceLess * 100}
-    `);
+    let data;
+    if (stock) {
+      data = await client.query(sql`
+        SELECT COUNT(*) AS amount
+        FROM products
+        WHERE stock = ${stock}
+        AND brand ~ ${brand}
+        AND price * (1 - discount/100.0) >= ${priceGreater * 100}
+        AND price * (1 - discount/100.0) <= ${priceLess * 100}
+      `);
+    } else {
+      data = await client.query(sql`
+        SELECT COUNT(*) AS amount
+        FROM products
+        WHERE brand ~ ${brand}
+        AND price * (1 - discount/100.0) >= ${priceGreater * 100}
+        AND price * (1 - discount/100.0) <= ${priceLess * 100}
+      `);
+    }
 
     client.release();
     const totalPages = Math.ceil(Number(data.rows[0].amount) / ITEMS_PER_PAGE);
@@ -381,28 +395,42 @@ export async function fetchProducts({
   sort,
   priceGreater,
   priceLess, 
-  page
+  page,
+  ITEMS_PER_PAGE = 24
 }: {
   stock: string,
   brand: string, 
   sort: string,
   priceGreater: number,
   priceLess: number,
-  page: number
+  page: number,
+  ITEMS_PER_PAGE?: number
 }) {
   sort = mapSort[sort as keyof typeof mapSort];
   
   try {
     const client = await pool.connect();
-    const data = await client.query(sql`
-      SELECT *
-      FROM products
-      WHERE stock = ${stock}
-      AND brand ~ ${brand}
-      AND price * (1 - discount/100.0) >= ${priceGreater * 100}
-      AND price * (1 - discount/100.0) <= ${priceLess * 100}
-    `
-    .append(` ORDER BY ${sort} LIMIT ${ITEMS_PER_PAGE} OFFSET ${(page - 1) * ITEMS_PER_PAGE}`));
+    let data;
+    if (stock) {
+      data = await client.query(sql`
+        SELECT *
+        FROM products
+        WHERE stock = ${stock}
+        AND brand ~ ${brand}
+        AND price * (1 - discount/100.0) >= ${priceGreater * 100}
+        AND price * (1 - discount/100.0) <= ${priceLess * 100}
+      `
+      .append(` ORDER BY ${sort} LIMIT ${ITEMS_PER_PAGE} OFFSET ${(page - 1) * ITEMS_PER_PAGE}`));
+    } else {
+      data = await client.query(sql`
+        SELECT *
+        FROM products
+        WHERE brand ~ ${brand}
+        AND price * (1 - discount/100.0) >= ${priceGreater * 100}
+        AND price * (1 - discount/100.0) <= ${priceLess * 100}
+      `
+      .append(` ORDER BY ${sort} LIMIT ${ITEMS_PER_PAGE} OFFSET ${(page - 1) * ITEMS_PER_PAGE}`));
+    }
 
     client.release();
     const products = data.rows.map((product: RawProduct) => ({
@@ -511,7 +539,7 @@ export async function fetchProductPage(path: string): Promise<Product> {
         FROM products
         JOIN keyboard_specs ON products.id = keyboard_specs.id
         WHERE path = ${path}`
-      );  
+      );
       break;
       case 'mouse':
         data = await client.query(sql`
@@ -538,6 +566,11 @@ export async function fetchProductPage(path: string): Promise<Product> {
       );
       break;
     }
+    if (!data?.rows[0]) data = await client.query(sql`
+        SELECT *
+        FROM products
+        WHERE path = ${path}`
+    );
 
     const product = data?.rows[0];
     product.discountedPrice = formatCurrency(+product.price - ((+product.discount / 100) * +product.price));
@@ -816,7 +849,7 @@ export async function getOrders(email: string) {
   try {
     const client = await pool.connect();
     const data = await client.query(sql`
-      SELECT o.id, o.order_date, o.price, o.status, oe.amount, p.name, p.image, p.path FROM orders o
+      SELECT o.details, o.id, o.order_date, o.price, o.status, oe.amount, p.name, p.image, p.path FROM orders o
       JOIN order_entries oe ON o.id = oe.order_id
       JOIN products p ON p.id = oe.product_id
       WHERE o.email = ${email}`
@@ -828,6 +861,7 @@ export async function getOrders(email: string) {
         date: row.order_date.toLocaleDateString().replace(/\//g, '-'),
         price: formatCurrency(row.price),
         status: row.status,
+        details: row.details,
         products: [{name: row.name, image: row.image, path: row.path, amount: row.amount}]
       };
       else orders[row.id].products.push({name: row.name, image: row.image, path: row.path, amount: row.amount});
@@ -838,5 +872,111 @@ export async function getOrders(email: string) {
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to get orders.');
+  }
+}
+
+export async function getRole(email: string) {
+  try {
+    const client = await pool.connect();
+    const data = await client.query(sql`
+      SELECT role FROM users
+      WHERE email = ${email}`
+    );
+    const role = data.rows[0].role;
+    client.release();
+    return role;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to get role.');
+  } 
+}
+
+export async function updateProduct(id: number, name: string, type: string, price: number, discount: number, path: string, image: string, brand: string, stock: string) {
+  try {
+    const client = await pool.connect();
+    await client.query(sql`
+      UPDATE products
+      SET name = ${name}, type = ${type}, price = ${price}, discount = ${discount}, path = ${path}, image = ${image}, brand = ${brand}, stock = ${stock}
+      WHERE id = ${id}`
+    );
+    client.release();
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to update product.');
+  }
+}
+
+export async function createProduct(name: string, type: string, price: number, discount: number, path: string, image: string, brand: string, stock: string) {
+  try {
+    const client = await pool.connect();
+    await client.query(sql`
+      INSERT INTO products (name, type, price, discount, path, image, brand, stock)
+      VALUES (${name}, ${type}, ${price}, ${discount}, ${path}, ${image}, ${brand}, ${stock})`
+    );
+    client.release();
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to create product.');
+  }
+}
+
+export async function getAllOrders(page: number, ITEMS_PER_PAGE: number) {
+  try {
+    const client = await pool.connect();
+    const data = await client.query(sql`
+      SELECT o.details, o.email, o.id, o.order_date, o.price, o.status, oe.amount, p.name, p.image, p.path FROM orders o
+      JOIN order_entries oe ON o.id = oe.order_id
+      JOIN products p ON p.id = oe.product_id`
+      .append(` LIMIT ${ITEMS_PER_PAGE} OFFSET ${(page - 1) * ITEMS_PER_PAGE}`)
+    );
+    const orders: any = {};
+    data.rows.forEach((row: any) => {
+      if (!orders[row.id]) orders[row.id] = {
+        id: row.id,
+        date: row.order_date.toLocaleDateString().replace(/\//g, '-'),
+        price: formatCurrency(row.price),
+        status: row.status,
+        details: row.details,
+        email: row.email,
+        products: [{name: row.name, image: row.image, path: row.path, amount: row.amount}]
+      };
+      else orders[row.id].products.push({name: row.name, image: row.image, path: row.path, amount: row.amount});
+    });
+
+    client.release();
+    return Object.values(orders);
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to get orders.');
+  }
+}
+
+export async function getOrderAmount(ITEMS_PER_PAGE: number) {
+  try {
+    const client = await pool.connect();
+    const data = await client.query(sql`
+      SELECT count(*) FROM orders`
+    );
+    client.release();
+    const totalPages = Math.ceil(Number(data.rows[0].amount) / ITEMS_PER_PAGE);
+    return totalPages;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to get order amount.');
+  }
+}
+
+export async function updateOrder(id: number, status: string, details: string) {
+  try {
+    const client = await pool.connect();
+    await client.query(sql`
+      UPDATE orders
+      SET status = ${status}, details = ${details}
+      WHERE id = ${id}`
+    );
+    client.release();
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to update order.');
   }
 }

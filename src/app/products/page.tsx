@@ -22,7 +22,7 @@ export default async function Page({
     const priceLimit = await fetchMaxPrice('keyboard');
     const currentPage = Number(searchParams?.page) || 1;
     const query = {
-        stock: searchParams?.stock === 'In Stock' ? '1' : searchParams?.stock === 'Out of Stock' ? '0' : '1',
+        stock: searchParams?.stock === 'In Stock' ? '1' : searchParams?.stock === 'Out of Stock' ? '0' : '',
         brand: searchParams?.brand || '',
         sort: searchParams?.sort || 'Date: Newest', 
         priceGreater: searchParams?.priceGreater || 0,

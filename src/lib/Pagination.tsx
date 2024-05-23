@@ -5,13 +5,13 @@ import Link from 'next/link';
 import { generatePagination } from '@/lib/utils';
 import { usePathname, useSearchParams } from 'next/navigation';
 
-export default function Pagination({ totalPages }: { totalPages: number }) {
+export default function Pagination({ totalPages, paramName = 'page' }: { totalPages: number, paramName?: string }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const currentPage = Number(searchParams.get('page')) || 1;
+  const currentPage = Number(searchParams.get(paramName)) || 1;
   const createPageURL = (page: number) => {
     const params = new URLSearchParams(searchParams);
-    params.set('page', page.toString());
+    params.set(paramName, page.toString());
     return `${pathname}?${params.toString()}`;
   };
 
@@ -19,7 +19,7 @@ export default function Pagination({ totalPages }: { totalPages: number }) {
 
   return (
     <>
-      <div className="inline-flex">
+      <div className="inline-flex mt-2">
         <PaginationArrow
           direction="left"
           href={createPageURL(currentPage - 1)}
@@ -68,7 +68,7 @@ function PaginationNumber({
   position?: 'first' | 'last' | 'middle' | 'single';
   isActive: boolean;
 }) {
-  const className = `flex h-10 w-10 items-center justify-center text-sm border ${position === 'first' ? 'rounded-l-md' : 'rounded-r-md'} ${isActive ? 'z-10 bg-stone-600 border-stone-600 text-white' : 'hover:bg-gray-100'} ${position === 'middle' ? 'text-gray-300' : ''} ${position === 'single' ? 'rounded-md' : ''}`;
+  const className = `flex h-10 w-10 items-center justify-center text-sm border ${position === 'first' ? 'rounded-l-md' : ''} ${position === 'last' ? 'rounded-r-md' : ''} ${isActive ? 'z-10 bg-stone-600 text-white' : 'hover:bg-gray-100 hover:text-gray-700'} ${position === 'middle' ? 'text-gray-300' : ''} ${position === 'single' ? 'rounded-md' : ''}`;
   return isActive || position === 'middle' ? (
     <div className={className}>{page}</div>
   ) : (
@@ -87,7 +87,7 @@ function PaginationArrow({
   direction: 'left' | 'right';
   isDisabled?: boolean;
 }) {
-  const className = `flex h-10 w-10 items-center justify-center rounded-md border ${isDisabled ? 'text-gray-300 pointer-events-none' : 'hover:bg-gray-100'} ${direction === 'left' ? 'mr-2 md:mr-4' : 'ml-2 md:ml-4'}`;
+  const className = `flex h-10 w-10 items-center justify-center rounded-md border ${isDisabled ? 'text-gray-300 pointer-events-none' : 'hover:bg-gray-100 hover:text-gray-700'} ${direction === 'left' ? 'mr-2 md:mr-4' : 'ml-2 md:ml-4'}`;
 
   const icon =
     direction === 'left' ? (

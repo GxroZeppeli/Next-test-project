@@ -6,9 +6,8 @@ import TableEntry from "@/lib/TableEntry";
 
 export default async function Page({ params }: { params: { path: string } }) {
     let product: any;
-    try {
+    try {        
         product = await fetchProductPage(params.path);
-        
     } catch (error) {
         notFound();
     }

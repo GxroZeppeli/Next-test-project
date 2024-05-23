@@ -22,6 +22,7 @@ export default async function Orders() {
                             <span>{order.date}</span>
                             <span>{order.price}</span>
                         </div>
+                        {order.details && <span>Details: {order.details}</span>}
                         <div className="flex gap-4 overflow-x-auto mt-4">
                             {order.products.map((product: any) => (
                                 <div key={product.name} className="flex">
