@@ -50,7 +50,6 @@ export default function Entry({id, path, discount, image, name, type, price, bra
         reader.readAsDataURL(file);
         reader.onload = () => {
             if (reader.result) {
-                image = reader.result;
                 setImageState(reader.result);
             }
         };

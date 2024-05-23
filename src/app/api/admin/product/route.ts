@@ -16,8 +16,8 @@ export async function PUT(req: Request) {
             const type = matches[1];
             const imageData = Buffer.from(matches[2], 'base64');
             
-            const imageName = `${Date.now()}.${type.split('/')[1]}`;
-            const filePath = `public/${imageName}`;
+            const imageName = `/${Date.now()}.${type.split('/')[1]}`;
+            const filePath = `public${imageName}`;
             fs.writeFile(filePath, imageData, 'binary', (err) => {
                 if (err) {
                     console.error(err);
@@ -25,9 +25,9 @@ export async function PUT(req: Request) {
                 }
                 console.log('Image saved to ' + filePath);
             });
-            fs.unlinkSync(`public/${data.oldImage}`);
+            fs.unlinkSync(`public${data.oldImage}`);
 
-            await updateProduct(data.id, data.name, data.type, data.price, data.discount, data.path, '/' + imageName, data.brand, data.stock);
+            await updateProduct(data.id, data.name, data.type, data.price, data.discount, data.path, imageName, data.brand, data.stock);
         } 
         else await updateProduct(data.id, data.name, data.type, data.price, data.discount, data.path, data.image, data.brand, data.stock);
 
@@ -51,8 +51,8 @@ export async function POST(req: Request) {
         const type = matches[1];
         const imageData = Buffer.from(matches[2], 'base64');
         
-        const imageName = `${Date.now()}.${type.split('/')[1]}`;
-        const filePath = `public/${imageName}`;
+        const imageName = `/${Date.now()}.${type.split('/')[1]}`;
+        const filePath = `public${imageName}`;
         fs.writeFile(filePath, imageData, 'binary', (err) => {
             if (err) {
                 console.error(err);
@@ -61,7 +61,7 @@ export async function POST(req: Request) {
             console.log('Image saved to ' + filePath);
         });
 
-        await createProduct(data.name, data.type, data.price, data.discount, data.path, '/' + imageName, data.brand, data.stock);
+        await createProduct(data.name, data.type, data.price, data.discount, data.path, imageName, data.brand, data.stock);
         return new Response('Product updated.', { status: 200 });
     }
     catch (error) {
